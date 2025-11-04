@@ -1,22 +1,27 @@
--- Foreløbig er det kun en placeholder
 
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE wishlists (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER,
-    name TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+CREATE TABLE IF NOT EXISTS wishlists (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE wishes (
-    id INTEGER PRIMARY KEY,
-    wishlist_id INTEGER,
-    title TEXT NOT NULL,
-    description TEXT,
-    link TEXT,
-    FOREIGN KEY (wishlist_id) REFERENCES wishlists(id)
+CREATE TABLE IF NOT EXISTS wishes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  wishlist_id INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  link TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (wishlist_id) REFERENCES wishlists(id) ON DELETE CASCADE
 );
