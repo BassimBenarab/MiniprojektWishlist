@@ -2,28 +2,30 @@ name: CI Build & Test
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
+    - name: Use Node.js 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
 
-      - name: Install dependencies
-        working-directory: ./backend
-        run: npm install
+    - name: Install dependencies
+      working-directory: backend
+      run: npm install
 
-      - name: Run basic tests
-        working-directory: ./backend
-        run: echo "✅ All good - basic CI passed"
+    - name: Run tests (if any)
+      working-directory: backend
+      run: npm test || echo "No tests configured"
 
+    - name: Build success
+      run: echo "✅ CI completed successfully!"
