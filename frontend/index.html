@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>MiniprojektWishlist - Demo</title>
+</head>
+<body>
+  <h1>MiniprojektWishlist — demo</h1>
+
+  <section>
+    <h2>Opret bruger</h2>
+    <input id="name" placeholder="Navn" />
+    <input id="email" placeholder="Email (valgfri)" />
+    <button id="createUser">Opret</button>
+    <pre id="userResult"></pre>
+  </section>
+
+  <script>
+    document.getElementById('createUser').addEventListener('click', async () => {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const res = await fetch('/users', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ name, email })
+      });
+      const data = await res.json();
+      document.getElementById('userResult').textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
