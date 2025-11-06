@@ -1,117 +1,102 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="da">
-<head>
-  <meta charset="utf-8" />
-  <title>MiniprojektWishlist</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 700px;
-      margin: 50px auto;
-      line-height: 1.6;
-    }
-    input, button {
-      padding: 8px;
-      margin: 5px 0;
-    }
-    button {
-      cursor: pointer;
-    }
-    pre {
-      background: #f5f5f5;
-      padding: 10px;
-      border-radius: 5px;
-    }
-    section {
-      margin-bottom: 30px;
-    }
-  </style>
-</head>
-<body>
-  <h1>🎁 MiniprojektWishlist</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wishlist</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px auto;
+        max-width: 600px;
+        background: #fafafa;
+        color: #222;
+      }
+      h1 {
+        text-align: center;
+      }
+      input {
+        padding: 10px;
+        width: 75%;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      button {
+        padding: 10px 15px;
+        background: #222;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #444;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        margin: 8px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+        background: white;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Min Ønskeliste 🎁</h1>
+    <div>
+      <input id="wishInput" type="text" placeholder="Tilføj et ønske..." />
+      <button onclick="addWish()">Tilføj</button>
+    </div>
 
-  <!-- Brugeroprettelse -->
-  <section>
-    <h2>Opret bruger</h2>
-    <input id="name" placeholder="Navn" />
-    <input id="email" placeholder="Email (valgfri)" />
-    <button id="createUser">Opret bruger</button>
-    <pre id="userResult"></pre>
-  </section>
+    <ul id="wishlist"></ul>
 
-  <!-- Opret ønskeseddel -->
-  <section>
-    <h2>Opret ønskeseddel</h2>
-    <input id="wishlistTitle" placeholder="Titel på ønskeseddel" />
-    <button id="createWishlist">Opret ønskeseddel</button>
-    <pre id="wishlistResult"></pre>
-  </section>
+    <script>
+      const API_URL = "http://localhost:3000/api/wishlist";
 
-  <!-- Tilføj ønske -->
-  <section>
-    <h2>Tilføj ønske</h2>
-    <input id="wishTitle" placeholder="Titel" />
-    <input id="wishDesc" placeholder="Beskrivelse" />
-    <input id="wishLink" placeholder="Link (valgfri)" />
-    <button id="addWish">Tilføj ønske</button>
-    <pre id="wishResult"></pre>
-  </section>
+      async function loadWishes() {
+        const res = await fetch(API_URL);
+        const wishes = await res.json();
+        const list = document.getElementById("wishlist");
+        list.innerHTML = "";
+        wishes.forEach((wish) => {
+          const li = document.createElement("li");
+          li.textContent = wish.title;
 
-  <!-- Vis alle ønsker -->
-  <section>
-    <h2>Vis ønsker</h2>
-    <button id="loadWishes">Hent ønsker</button>
-    <pre id="allWishes"></pre>
-  </section>
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌";
+          delBtn.onclick = () => deleteWish(wish.id);
 
-  <script>
-    const api = 'http://localhost:3000';
-    let userId = 1;
-    let wishlistId = 1;
+          li.appendChild(delBtn);
+          list.appendChild(li);
+        });
+      }
 
-    document.getElementById('createUser').onclick = async () => {
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const res = await fetch(`${api}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email })
-      });
-      const data = await res.json();
-      userId = data.id;
-      document.getElementById('userResult').textContent = JSON.stringify(data, null, 2);
-    };
+      async function addWish() {
+        const input = document.getElementById("wishInput");
+        const title = input.value.trim();
+        if (!title) return alert("Skriv et ønske!");
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title }),
+        });
+        input.value = "";
+        loadWishes();
+      }
 
-    document.getElementById('createWishlist').onclick = async () => {
-      const title = document.getElementById('wishlistTitle').value;
-      const res = await fetch(`${api}/users/${userId}/wishlists`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title })
-      });
-      const data = await res.json();
-      wishlistId = data.id;
-      document.getElementById('wishlistResult').textContent = JSON.stringify(data, null, 2);
-    };
+      async function deleteWish(id) {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        loadWishes();
+      }
 
-    document.getElementById('addWish').onclick = async () => {
-      const title = document.getElementById('wishTitle').value;
-      const description = document.getElementById('wishDesc').value;
-      const link = document.getElementById('wishLink').value;
-      const res = await fetch(`${api}/wishlists/${wishlistId}/wishes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, link })
-      });
-      const data = await res.json();
-      document.getElementById('wishResult').textContent = JSON.stringify(data, null, 2);
-    };
-
-    document.getElementById('loadWishes').onclick = async () => {
-      const res = await fetch(`${api}/wishlists/${wishlistId}/wishes`);
-      const data = await res.json();
-      document.getElementById('allWishes').textContent = JSON.stringify(data, null, 2);
-    };
-  </script>
-</body>
+      loadWishes();
+    </script>
+  </body>
 </html>

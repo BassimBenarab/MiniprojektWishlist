@@ -1,13 +1,24 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const dbPath = path.resolve(__dirname, '../db/db.sqlite');
-const db = new sqlite3.Database(dbPath);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-function runScriptFile(filePath, cb) {
-  const fs = require('fs');
-  const sql = fs.readFileSync(filePath, 'utf8');
-  db.exec(sql, cb);
+export async function initDb() {
+  const db = await open({
+    filename: path.join(__dirname, "../wishlist.db"),
+    driver: sqlite3.Database,
+  });
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS wishlist (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL
+    )
+  `);
+
+  console.log("✅ Database initialized");
+  return db;
 }
-
-module.exports = { db, runScriptFile };
